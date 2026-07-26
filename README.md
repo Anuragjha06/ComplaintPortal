@@ -69,7 +69,7 @@ git clone https://github.com/Anuragjha06/ComplaintPortal.git
 ### 2. Navigate to the project
 
 ```bash
-cd Complaint-Registration-System
+cd ComplaintPortal
 ```
 
 ### 3. Install dependencies
