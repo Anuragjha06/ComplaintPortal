@@ -1,11 +1,9 @@
--- 1. Create Database
 CREATE DATABASE ComplaintSystemDB;
 GO
 
 USE ComplaintSystemDB;
 GO
 
--- 2. Create Users Table
 CREATE TABLE Users (
     UserID INT IDENTITY(1,1) PRIMARY KEY,
     GoogleID VARCHAR(255) NOT NULL UNIQUE,
@@ -13,8 +11,6 @@ CREATE TABLE Users (
     Email VARCHAR(150) NOT NULL UNIQUE,
     CreatedAt DATETIME DEFAULT GETDATE()
 );
-
--- 3. Create Admin Table
 CREATE TABLE Admin (
     AdminID INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
@@ -22,7 +18,6 @@ CREATE TABLE Admin (
     Role NVARCHAR(50) DEFAULT 'SuperAdmin'
 );
 
--- 4. Create Complaints Table
 CREATE TABLE Complaints (
     ComplaintID INT IDENTITY(1001,1) PRIMARY KEY,
     UserID INT NOT NULL,
@@ -34,15 +29,11 @@ CREATE TABLE Complaints (
     FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
 GO
-
--- 5. Insert Sample Admin
+    
 INSERT INTO Admin (Name, Email, Role) 
 VALUES ('System Admin', 'admin@yourdomain.com', 'SuperAdmin');
 GO
-
--- 6. Essential Operational Queries / Stored Procedures
-
--- Register or Sync Google User
+    
 CREATE PROCEDURE sp_SyncUser
     @GoogleID VARCHAR(255),
     @Name NVARCHAR(100),
@@ -58,7 +49,6 @@ BEGIN
 END;
 GO
 
--- View to display Complaints with User details for Admin Dashboard
 CREATE VIEW vw_ComplaintDetails AS
 SELECT 
     c.ComplaintID,
