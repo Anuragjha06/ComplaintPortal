@@ -43,8 +43,6 @@ A web-based Complaint Registration & Tracking System that enables users to regis
 
 ## 📂 Project Structure
 
-## 📂 Project Structure
-
 ```text
 complaint-tracker-portal/
 ├── .env                         
