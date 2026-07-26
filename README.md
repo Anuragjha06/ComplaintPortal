@@ -65,7 +65,7 @@ complaint-tracker-portal/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/Complaint-Registration-System.git
+git clone https://github.com/Anuragjha06/ComplaintPortal.git
 ```
 
 ### 2. Navigate to the project
@@ -129,7 +129,7 @@ http://localhost:5000
 | Description | TEXT |
 | Status | VARCHAR |
 | Date | DATETIME |
-| Admin
+| AdminReply | VARHAR |
 
 ### Admin
 
@@ -178,7 +178,8 @@ http://localhost:5000
 ## 👨‍💻 Contributors
 
 - **Anurag Jha**
-- Team Members (Add Names)
+- **Ankush Jha**
+- **Alok Jha**
 
 ---
 
