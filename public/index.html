@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">📋</div>
+            <div class="logo-text">
+                <h2>Complaint Tracker</h2>
+                <small>Quick & Transparent Resolution</small>
+            </div>
+        </div>
+        
+        <div id="auth-controls">
+            <div id="user-info" class="user-profile-badge hidden">
+                <span id="user-avatar" class="avatar-circle">U</span>
+                <span id="user-name" class="user-display-name"></span>
+                <button class="btn btn-outline" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <!-- HOMEPAGE LANDING VIEW -->
+        <div id="logged-out-view" class="hero-section">
+            <div class="hero-content">
+                <span class="badge-pill">🚀 Smart Issue Tracking System</span>
+                <h1 class="hero-title">Have a Problem? <br><span class="highlight-text">We're Here to Help.</span></h1>
+                <p class="hero-subtitle">
+                    Register hardware, software, or facility complaints effortlessly. Track real-time progress and get direct responses from administrators.
+                </p>
+
+                <!-- TWO LOGIN CARDS WITH DIRECT GOOGLE BUTTON CONTAINERS -->
+                <div class="login-action-cards">
+                    <div class="login-card user-card">
+                        <div class="card-icon">👤</div>
+                        <h3>Login as User</h3>
+                        <p>Submit new complaints and track status updates in real-time.</p>
+                        <!-- Container where User Google Button is rendered -->
+                        <div id="google-btn-user" class="google-btn-wrapper"></div>
+                    </div>
+
+                    <div class="login-card admin-card">
+                        <div class="card-icon">🛡️</div>
+                        <h3>Login as Admin</h3>
+                        <p>Manage submitted complaints, change statuses, and send replies.</p>
+                        <!-- Container where Admin Google Button is rendered -->
+                        <div id="google-btn-admin" class="google-btn-wrapper"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Summary -->
+            <div class="features-grid">
+                <div class="feature-box">
+                    <div class="feature-icon">⚡</div>
+                    <h4>Fast Resolution</h4>
+                    <p>Complaints are routed directly to responsible personnel.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">🔔</div>
+                    <h4>Live Updates</h4>
+                    <p>Check status updates from Submitted to Resolved instantly.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">💬</div>
+                    <h4>Direct Replies</h4>
+                    <p>Get feedback and detailed solutions directly from admins.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AUTHENTICATED DASHBOARD -->
+        <div id="logged-in-view" class="hidden">
+            
+            <!-- USER PORTAL -->
+            <div id="user-section" class="hidden">
+                <div class="nav-tabs">
+                    <button class="tab-btn active" onclick="switchUserTab('new-complaint')">➕ Register Complaint</button>
+                    <button class="tab-btn" onclick="switchUserTab('track-complaints')">📊 My Complaints & Status</button>
+                </div>
+
+                <div id="tab-new-complaint" class="tab-content card">
+                    <h3>Submit a New Complaint</h3>
+                    <p class="section-desc">Please fill out the details below to log your issue.</p>
+                    <form id="complaint-form" onsubmit="submitComplaint(event)">
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" required>
+                                <option value="">Select Category</option>
+                                <option value="Hardware/Equipment">Hardware / Equipment</option>
+                                <option value="Software/Network">Software / Network</option>
+                                <option value="Facility/Maintenance">Facility / Maintenance</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" rows="4" required placeholder="Describe your issue in detail..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-large">Submit Complaint</button>
+                    </form>
+                </div>
+
+                <div id="tab-track-complaints" class="tab-content card hidden">
+                    <h3>Track My Complaints</h3>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Admin Response</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-complaints-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN PORTAL -->
+            <div id="admin-section" class="hidden">
+                <div class="card">
+                    <div class="admin-header-row">
+                        <h3>Admin Resolution Dashboard</h3>
+                        <span class="badge-admin">Admin Mode</span>
+                    </div>
+                    <div class="filter-container">
+                        <input type="text" id="admin-search" placeholder="🔍 Search ID, User, or Category..." onkeyup="loadAdminComplaints()">
+                        <select id="admin-filter" onchange="loadAdminComplaints()">
+                            <option value="All">All Statuses</option>
+                            <option value="Submitted">Submitted</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Admin Reply</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-complaints-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+       const API_BASE_URL = 'http://localhost:5000';
+let GOOGLE_CLIENT_ID = '';
+let currentUser = null;
+let selectedLoginRole = 'user';
+
+window.onload = async function() {
+    // 1. Fetch Client ID
+    try {
+        const configRes = await fetch(`${API_BASE_URL}/api/config`);
+        const configData = await configRes.json();
+        GOOGLE_CLIENT_ID = configData.googleClientId;
+        
+        if (!GOOGLE_CLIENT_ID) {
+            console.error('Google Client ID is missing from server response.');
+            return;
+        }
+    } catch (err) {
+        console.error('Could not fetch config from backend. Make sure server is running on port 5000.', err);
+        return;
+    }
+
+    // 2. Check Session or Initialize Buttons
+    const savedUser = localStorage.getItem('user');
+    const savedRole = localStorage.getItem('userRole');
+    
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        selectedLoginRole = savedRole || 'user';
+        updateUI(true);
+    } else {
+        initGoogleAuth();
+    }
+};
+
+function initGoogleAuth() {
+    // Wait until Google SDK script is ready
+    if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+        setTimeout(initGoogleAuth, 100);
+        return;
+    }
+
+    google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse
+    });
+
+    const userBtnContainer = document.getElementById('google-btn-user');
+    const adminBtnContainer = document.getElementById('google-btn-admin');
+
+    if (userBtnContainer) {
+        google.accounts.id.renderButton(userBtnContainer, {
+            theme: 'outline',
+            size: 'large',
+            width: 220,
+            text: 'signin_with'
+        });
+        userBtnContainer.addEventListener('click', () => { selectedLoginRole = 'user'; });
+    }
+
+    if (adminBtnContainer) {
+        google.accounts.id.renderButton(adminBtnContainer, {
+            theme: 'filled_blue',
+            size: 'large',
+            width: 220,
+            text: 'signin_with'
+        });
+        adminBtnContainer.addEventListener('click', () => { selectedLoginRole = 'admin'; });
+    }
+}
+        async function handleCredentialResponse(response) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: response.credential })
+                });
+
+                const data = await res.json();
+                if (data.success && data.user) {
+                    currentUser = data.user;
+
+                    // Role Check Guard
+                    if (selectedLoginRole === 'admin' && !currentUser.isAdmin) {
+                        alert(`Access Denied: The account (${currentUser.Email}) is not listed in the Admin database.`);
+                        return;
+                    }
+
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    localStorage.setItem('userRole', selectedLoginRole);
+                    updateUI(true);
+                } else {
+                    alert('Authentication failed: ' + (data.message || 'Unknown error'));
+                }
+            } catch (err) {
+                console.error("Connection Error:", err);
+                alert('Could not connect to backend server at http://localhost:5000!');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('userRole');
+            currentUser = null;
+            updateUI(false);
+            window.location.reload();
+        }
+
+        function updateUI(isLoggedIn) {
+            if (isLoggedIn) {
+                document.getElementById('logged-out-view').classList.add('hidden');
+                document.getElementById('logged-in-view').classList.remove('hidden');
+                document.getElementById('user-info').classList.remove('hidden');
+                
+                document.getElementById('user-name').innerText = currentUser.Name;
+                document.getElementById('user-avatar').innerText = currentUser.Name.charAt(0).toUpperCase();
+
+                if (currentUser.isAdmin && selectedLoginRole === 'admin') {
+                    document.getElementById('admin-section').classList.remove('hidden');
+                    document.getElementById('user-section').classList.add('hidden');
+                    loadAdminComplaints();
+                } else {
+                    document.getElementById('user-section').classList.remove('hidden');
+                    document.getElementById('admin-section').classList.add('hidden');
+                    loadUserComplaints();
+                }
+            } else {
+                document.getElementById('logged-out-view').classList.remove('hidden');
+                document.getElementById('logged-in-view').classList.add('hidden');
+                document.getElementById('user-info').classList.add('hidden');
+            }
+        }
+
+        function switchUserTab(tab) {
+            const btnNew = document.querySelectorAll('.tab-btn')[0];
+            const btnTrack = document.querySelectorAll('.tab-btn')[1];
+            const tabNew = document.getElementById('tab-new-complaint');
+            const tabTrack = document.getElementById('tab-track-complaints');
+
+            if (tab === 'new-complaint') {
+                btnNew.classList.add('active');
+                btnTrack.classList.remove('active');
+                tabNew.classList.remove('hidden');
+                tabTrack.classList.add('hidden');
+            } else {
+                btnTrack.classList.add('active');
+                btnNew.classList.remove('active');
+                tabTrack.classList.remove('hidden');
+                tabNew.classList.add('hidden');
+                loadUserComplaints();
+            }
+        }
+
+        // --- User API Functions ---
+        async function submitComplaint(e) {
+            e.preventDefault();
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
+
+            const res = await fetch(`${API_BASE_URL}/api/complaints`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUser.UserID, category, description })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert('Complaint Registered Successfully!');
+                document.getElementById('complaint-form').reset();
+                switchUserTab('track-complaints');
+            }
+        }
+
+        async function loadUserComplaints() {
+            const res = await fetch(`${API_BASE_URL}/api/complaints/user/${currentUser.UserID}`);
+            const result = await res.json();
+            const tbody = document.getElementById('user-complaints-table');
+            tbody.innerHTML = '';
+
+            if (!result.data || result.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No complaints registered yet.</td></tr>';
+                return;
+            }
+
+            result.data.forEach(c => {
+                const statusClass = c.Status.toLowerCase().replace(' ', '-');
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>#${c.ComplaintID}</strong></td>
+                        <td>${c.Category}</td>
+                        <td>${c.Description}</td>
+                        <td>${new Date(c.CreatedDate).toLocaleDateString()}</td>
+                        <td><span class="badge badge-${statusClass}">${c.Status}</span></td>
+                        <td>${c.AdminReply ? `<em>${c.AdminReply}</em>` : '<small style="color:#94a3b8;">Pending Response</small>'}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- Admin API Functions ---
+        async function loadAdminComplaints() {
+            const search = document.getElementById('admin-search').value;
+            const status = document.getElementById('admin-filter').value;
+
+            const res = await fetch(`${API_BASE_URL}/api/admin/complaints?search=${search}&status=${status}`);
+            const result = await res.json();
+            const tbody = document.getElementById('admin-complaints-table');
+            tbody.innerHTML = '';
+
+            result.data.forEach(c => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>#${c.ComplaintID}</strong></td>
+                        <td><strong>${c.UserName}</strong><br><small style="color:#64748b;">${c.UserEmail}</small></td>
+                        <td>${c.Category}</td>
+                        <td>${c.Description}</td>
+                        <td>
+                            <select id="status-${c.ComplaintID}" class="table-select">
+                                <option value="Submitted" ${c.Status === 'Submitted' ? 'selected' : ''}>Submitted</option>
+                                <option value="In Progress" ${c.Status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                <option value="Resolved" ${c.Status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                                <option value="Rejected" ${c.Status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" class="table-input" id="reply-${c.ComplaintID}" value="${c.AdminReply || ''}" placeholder="Write response to user...">
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="resolveComplaint(${c.ComplaintID})">Save</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function resolveComplaint(id) {
+            const status = document.getElementById(`status-${id}`).value;
+            const adminReply = document.getElementById(`reply-${id}`).value;
+
+            const res = await fetch(`${API_BASE_URL}/api/admin/complaints/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status, adminReply })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert('Complaint Status & Reply updated!');
+                loadAdminComplaints();
+            }
+        }
+    </script>
+</body>
+</html>
